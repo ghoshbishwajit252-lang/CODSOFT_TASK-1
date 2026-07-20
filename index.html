@@ -1,89 +1,597 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Simple Calculator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeoCalc · smart calculator</title>
+    <!-- Font Awesome for icons (free) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 400px;
-            margin: 50px auto;
-            padding: 20px;
-            background: #f4f4f4;
-            border-radius: 10px;
-        }
-        h2 { text-align: center; color: #333; }
-        input, select, button {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
+        * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
-        button {
-            background: #007bff;
+
+        body {
+            background: linear-gradient(145deg, #f6f9fc 0%, #e9f0f5 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .calc-wrapper {
+            max-width: 520px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border-radius: 48px;
+            padding: 2rem 2rem 2.2rem;
+            box-shadow: 0 30px 50px rgba(0, 20, 30, 0.2), 0 10px 20px rgba(0,0,0,0.05);
+            border: 1px solid rgba(255,255,255,0.5);
+            transition: all 0.2s ease;
+        }
+
+        /* header */
+        .calc-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.8rem;
+        }
+
+        .calc-header h2 {
+            font-weight: 600;
+            font-size: 1.8rem;
+            letter-spacing: -0.5px;
+            color: #1b2b3f;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .calc-header h2 i {
+            color: #2a7de1;
+            font-size: 1.9rem;
+        }
+
+        .badge {
+            background: #1b2b3f;
             color: white;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 0.3rem 0.9rem;
+            border-radius: 40px;
+            letter-spacing: 0.3px;
+            background: #2a3a4e;
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.1);
         }
-        button:hover { background: #0056b3; }
-        .result {
-            background: white;
-            padding: 15px;
-            border-radius: 5px;
+
+        /* input group */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 0.7rem;
+            align-items: center;
+        }
+
+        .input-row .label-icon {
+            width: 2.4rem;
+            color: #2a5f7a;
+            font-size: 1.1rem;
             text-align: center;
-            font-size: 20px;
-            margin-top: 15px;
-            border: 2px solid #28a745;
         }
-        .error { border-color: #dc3545; color: #dc3545; }
+
+        .input-row input {
+            flex: 1;
+            padding: 0.9rem 1rem;
+            border: none;
+            border-radius: 28px;
+            background: white;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #0e1e2b;
+            box-shadow: 0 4px 8px rgba(0, 10, 20, 0.04), inset 0 0 0 1px rgba(0,0,0,0.02);
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .input-row input:focus {
+            box-shadow: 0 4px 12px rgba(42, 125, 225, 0.15), 0 0 0 3px rgba(42, 125, 225, 0.2);
+            background: #ffffff;
+        }
+
+        .input-row input::placeholder {
+            color: #9aafbe;
+            font-weight: 400;
+        }
+
+        /* operation selector */
+        .op-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0 1.4rem;
+            justify-content: center;
+        }
+
+        .op-btn {
+            flex: 1 0 auto;
+            background: white;
+            border: none;
+            border-radius: 60px;
+            padding: 0.65rem 0.2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #1d3347;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.02), inset 0 0 0 1px rgba(0,0,0,0.03);
+            transition: all 0.15s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: #f2f8ff;
+            border: 1px solid transparent;
+        }
+
+        .op-btn i {
+            font-size: 1rem;
+            color: #2a5f7a;
+        }
+
+        .op-btn:hover {
+            background: #e3edf9;
+            transform: scale(0.97);
+            border-color: #b3cef0;
+        }
+
+        .op-btn.active {
+            background: #1b3b5c;
+            color: white;
+            box-shadow: 0 8px 14px rgba(26, 67, 113, 0.25);
+            border-color: #1b3b5c;
+        }
+
+        .op-btn.active i {
+            color: white;
+        }
+
+        /* action button */
+        .action-btn {
+            width: 100%;
+            background: #1b3b5c;
+            border: none;
+            border-radius: 60px;
+            padding: 1rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+            box-shadow: 0 12px 20px -8px rgba(26, 67, 113, 0.3);
+            transition: 0.15s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 0.5rem 0 1.5rem;
+            letter-spacing: 0.3px;
+        }
+
+        .action-btn:hover {
+            background: #12304b;
+            transform: scale(0.98);
+            box-shadow: 0 6px 14px rgba(26, 67, 113, 0.25);
+        }
+
+        .action-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* result display */
+        .result-card {
+            background: white;
+            border-radius: 40px;
+            padding: 1.2rem 1.8rem;
+            margin-bottom: 1.8rem;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.02), 0 6px 14px rgba(0, 20, 30, 0.06);
+            border: 1px solid rgba(255,255,255,0.6);
+            transition: 0.2s;
+            min-height: 5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 4px 10px;
+        }
+
+        .result-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #0b1e2c;
+            word-break: break-all;
+            text-align: center;
+        }
+
+        .result-text .highlight {
+            background: #d7e8ff;
+            padding: 0.1rem 0.6rem;
+            border-radius: 30px;
+            color: #00337a;
+        }
+
+        .result-text.error {
+            color: #c53e3e;
+            background: #ffe9e9;
+            padding: 0.3rem 1.2rem;
+            border-radius: 60px;
+            font-size: 1.2rem;
+        }
+
+        /* history panel */
+        .history-section {
+            background: rgba(255,255,255,0.5);
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+            border-radius: 40px;
+            padding: 0.8rem 1.2rem 0.5rem;
+            margin-top: 0.5rem;
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #1b3a4e;
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .history-header i {
+            color: #306f96;
+        }
+
+        .history-list {
+            max-height: 100px;
+            overflow-y: auto;
+            padding-right: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .history-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .history-list::-webkit-scrollbar-thumb {
+            background: #b7cfdf;
+            border-radius: 20px;
+        }
+
+        .history-item {
+            background: white;
+            padding: 0.45rem 1rem;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            color: #1a2f40;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+            display: flex;
+            justify-content: space-between;
+            border-left: 4px solid #2a7de1;
+        }
+
+        .history-item .h-value {
+            font-weight: 500;
+        }
+
+        .history-item .h-time {
+            color: #6a869e;
+            font-size: 0.7rem;
+            background: #ecf3fa;
+            padding: 0.1rem 0.7rem;
+            border-radius: 30px;
+        }
+
+        .clear-history {
+            background: transparent;
+            border: none;
+            color: #6f8fa8;
+            font-size: 0.75rem;
+            cursor: pointer;
+            padding: 0.2rem 0.7rem;
+            border-radius: 30px;
+            transition: 0.1s;
+        }
+
+        .clear-history:hover {
+            background: #d7e2ed;
+            color: #1c3f5a;
+        }
+
+        .empty-history {
+            color: #7d99af;
+            font-size: 0.9rem;
+            text-align: center;
+            padding: 0.3rem 0;
+        }
+
+        /* footer */
+        .footer-note {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 0.8rem;
+            font-size: 0.7rem;
+            color: #7f9bb3;
+            gap: 12px;
+        }
+
+        .footer-note i {
+            margin-right: 4px;
+        }
+
+        /* responsive */
+        @media (max-width: 480px) {
+            .calc-wrapper { padding: 1.5rem; }
+            .op-btn { font-size: 0.85rem; padding: 0.5rem 0.1rem; }
+            .result-text { font-size: 1.2rem; }
+        }
     </style>
 </head>
 <body>
-    <h2>🧮 Simple Calculator</h2>
-    <input type="number" id="num1" placeholder="Enter first number" step="any">
-    <input type="number" id="num2" placeholder="Enter second number" step="any">
-    <select id="operation">
-        <option value="add">➕ Addition (+)</option>
-        <option value="subtract">➖ Subtraction (-)</option>
-        <option value="multiply">✖️ Multiplication (×)</option>
-        <option value="divide">➗ Division (÷)</option>
-    </select>
-    <button onclick="calculate()">Calculate</button>
-    <div id="result" class="result">Ready to calculate...</div>
+<div class="calc-wrapper">
+    <!-- header -->
+    <div class="calc-header">
+        <h2><i class="fas fa-calculator"></i> NeoCalc</h2>
+        <span class="badge"><i class="far fa-keyboard"></i> ⌨️ ready</span>
+    </div>
 
-    <script>
+    <!-- inputs -->
+    <div class="input-group">
+        <div class="input-row">
+            <span class="label-icon"><i class="fas fa-arrow-right" style="opacity:0.6;"></i></span>
+            <input type="number" id="num1" placeholder="First number" step="any" value="12">
+        </div>
+        <div class="input-row">
+            <span class="label-icon"><i class="fas fa-arrow-left" style="opacity:0.6;"></i></span>
+            <input type="number" id="num2" placeholder="Second number" step="any" value="4">
+        </div>
+    </div>
+
+    <!-- operation buttons (enhanced UX) -->
+    <div class="op-selector" id="opSelector">
+        <button class="op-btn active" data-op="add"><i class="fas fa-plus-circle"></i> +</button>
+        <button class="op-btn" data-op="subtract"><i class="fas fa-minus-circle"></i> −</button>
+        <button class="op-btn" data-op="multiply"><i class="fas fa-times-circle"></i> ×</button>
+        <button class="op-btn" data-op="divide"><i class="fas fa-divide"></i> ÷</button>
+        <button class="op-btn" data-op="power"><i class="fas fa-superscript"></i> xʸ</button>
+        <button class="op-btn" data-op="modulo"><i class="fas fa-percent"></i> %</button>
+    </div>
+
+    <!-- calculate button -->
+    <button class="action-btn" id="calculateBtn"><i class="fas fa-play"></i> Calculate</button>
+
+    <!-- result -->
+    <div class="result-card" id="resultCard">
+        <div class="result-text" id="resultText">✨ ready</div>
+    </div>
+
+    <!-- history -->
+    <div class="history-section">
+        <div class="history-header">
+            <span><i class="fas fa-history"></i> history</span>
+            <button class="clear-history" id="clearHistoryBtn"><i class="fas fa-undo-alt"></i> clear</button>
+        </div>
+        <div class="history-list" id="historyList">
+            <div class="empty-history">no calculations yet</div>
+        </div>
+    </div>
+    <div class="footer-note">
+        <span><i class="fas fa-arrows-alt-h"></i> press Enter to calc</span>
+        <span><i class="fas fa-mouse-pointer"></i> click operator</span>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // DOM elements
+        const num1Input = document.getElementById('num1');
+        const num2Input = document.getElementById('num2');
+        const resultText = document.getElementById('resultText');
+        const resultCard = document.getElementById('resultCard');
+        const historyList = document.getElementById('historyList');
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+        const calcBtn = document.getElementById('calculateBtn');
+
+        // operation buttons
+        const opBtns = document.querySelectorAll('.op-btn');
+        let currentOp = 'add';   // default
+
+        // --- helper: get selected operation symbol and function ---
+        function getOperation(op) {
+            const map = {
+                'add':     { symbol: '+', fn: (a,b) => a + b },
+                'subtract':{ symbol: '−', fn: (a,b) => a - b },
+                'multiply':{ symbol: '×', fn: (a,b) => a * b },
+                'divide':  { symbol: '÷', fn: (a,b) => { if (b === 0) return { error: 'Division by zero' }; return a / b; } },
+                'power':   { symbol: '^', fn: (a,b) => Math.pow(a, b) },
+                'modulo':  { symbol: '%', fn: (a,b) => { if (b === 0) return { error: 'Modulo by zero' }; return a % b; } }
+            };
+            return map[op] || map['add'];
+        }
+
+        // --- perform calculation and update UI ---
         function calculate() {
-            const num1 = parseFloat(document.getElementById('num1').value);
-            const num2 = parseFloat(document.getElementById('num2').value);
-            const op = document.getElementById('operation').value;
-            const resultDiv = document.getElementById('result');
-            
-            if (isNaN(num1) || isNaN(num2)) {
-                resultDiv.className = 'result error';
-                resultDiv.textContent = '❌ Please enter valid numbers!';
+            const raw1 = num1Input.value.trim();
+            const raw2 = num2Input.value.trim();
+            const num1 = parseFloat(raw1);
+            const num2 = parseFloat(raw2);
+
+            // validation
+            if (isNaN(num1) || isNaN(num2) || raw1 === '' || raw2 === '') {
+                resultText.className = 'result-text error';
+                resultText.innerHTML = '⚠️ Please enter valid numbers';
+                resultCard.style.borderColor = '#f6b0b0';
                 return;
             }
 
-            let result, symbol;
-            switch(op) {
-                case 'add': result = num1 + num2; symbol = '+'; break;
-                case 'subtract': result = num1 - num2; symbol = '-'; break;
-                case 'multiply': result = num1 * num2; symbol = '×'; break;
-                case 'divide':
-                    if (num2 === 0) {
-                        resultDiv.className = 'result error';
-                        resultDiv.textContent = '❌ Error: Division by zero!';
-                        return;
-                    }
-                    result = num1 / num2; symbol = '÷'; break;
+            const opObj = getOperation(currentOp);
+            let result;
+            let errorMsg = null;
+
+            // handle division / modulo errors
+            if (currentOp === 'divide' || currentOp === 'modulo') {
+                const res = opObj.fn(num1, num2);
+                if (res && typeof res === 'object' && res.error) {
+                    errorMsg = res.error;
+                } else {
+                    result = res;
+                }
+            } else {
+                result = opObj.fn(num1, num2);
             }
-            
-            resultDiv.className = 'result';
-            resultDiv.textContent = `${num1} ${symbol} ${num2} = ${result}`;
+
+            // error display
+            if (errorMsg) {
+                resultText.className = 'result-text error';
+                resultText.innerHTML = `🚫 ${errorMsg}`;
+                resultCard.style.borderColor = '#f6b0b0';
+                return;
+            }
+
+            // success
+            const symbol = opObj.symbol;
+            const resultStr = Number.isInteger(result) ? result : parseFloat(result.toFixed(8));
+            const displayResult = typeof resultStr === 'number' ? resultStr : result;
+
+            // build human readable expression
+            const expr = `${num1} ${symbol} ${num2} = ${displayResult}`;
+            resultText.className = 'result-text';
+            resultText.innerHTML = `${num1} <span class="highlight">${symbol}</span> ${num2} = <strong>${displayResult}</strong>`;
+            resultCard.style.borderColor = '#b8d4f0';
+
+            // add to history
+            addHistory(expr);
+
+            // update active style on op buttons (already set by click)
         }
-    </script>
+
+        // --- history management ---
+        function addHistory(entry) {
+            const items = historyList.querySelectorAll('.history-item');
+            // if only empty placeholder, remove it
+            const empty = historyList.querySelector('.empty-history');
+            if (empty) empty.remove();
+
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            div.innerHTML = `<span class="h-value">${entry}</span><span class="h-time">${time}</span>`;
+            historyList.prepend(div);
+
+            // limit to 12 items
+            while (historyList.children.length > 12) {
+                historyList.lastChild?.remove();
+            }
+        }
+
+        function clearHistory() {
+            historyList.innerHTML = `<div class="empty-history">no calculations yet</div>`;
+        }
+
+        // --- update active operation button ---
+        function setActiveOp(op) {
+            opBtns.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.op === op) {
+                    btn.classList.add('active');
+                }
+            });
+            currentOp = op;
+        }
+
+        // --- event listeners ---
+
+        // operation button clicks
+        opBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                const op = this.dataset.op;
+                setActiveOp(op);
+                // optional: refocus input
+                num1Input.focus();
+                // optionally auto-calculate? we let user click calculate or Enter.
+                // but we also update result preview? we keep it as is.
+                // we could auto-calculate if both inputs are valid (like a real calculator)
+                // but we prefer explicit click on calculate or Enter.
+            });
+        });
+
+        // calculate button
+        calcBtn.addEventListener('click', calculate);
+
+        // keyboard support: Enter key on any input triggers calculate
+        num1Input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                calculate();
+            }
+        });
+        num2Input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                calculate();
+            }
+        });
+
+        // clear history
+        clearHistoryBtn.addEventListener('click', clearHistory);
+
+        // set default active op (add)
+        setActiveOp('add');
+
+        // --- extra feature: click on result area to re-run? just for UX
+        resultCard.addEventListener('dblclick', function() {
+            calculate();
+        });
+
+        // additional: if input changes we could clear error style
+        num1Input.addEventListener('input', function() {
+            resultCard.style.borderColor = '#e6edf4';
+            if (resultText.classList.contains('error')) {
+                resultText.className = 'result-text';
+                resultText.innerHTML = '✨ ready';
+            }
+        });
+        num2Input.addEventListener('input', function() {
+            resultCard.style.borderColor = '#e6edf4';
+            if (resultText.classList.contains('error')) {
+                resultText.className = 'result-text';
+                resultText.innerHTML = '✨ ready';
+            }
+        });
+
+        // seed history with a welcome entry
+        addHistory('12 + 4 = 16');
+        addHistory('25 − 7 = 18');
+        // set input values to match seed
+        num1Input.value = 12;
+        num2Input.value = 4;
+        setActiveOp('add');
+        // optional: compute default
+        setTimeout(() => calculate(), 30);
+    })();
+</script>
 </body>
 </html>
